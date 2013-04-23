@@ -137,6 +137,15 @@ class MMSEmailMessage(object):
 
         return recipients
 
+    def get_recipients_count(self, **kwargs):
+        req = self.mms_client.process_request(
+            method='recipientsCount',
+            email_message_id=self.id,
+            **kwargs
+        )
+
+        return req
+
     def add_recipients(self, recipient_list, chunk_size=None):
         if chunk_size is None:
             chunk_size = len(recipient_list)
@@ -170,6 +179,22 @@ class MMSEmailMessage(object):
     def dispatch(self):
         req = self.mms_client.process_request(
             method='setToBeDispatched',
+            email_message_id=self.id
+        )
+
+        return req
+
+    def suspend(self):
+        req = self.mms_client.process_request(
+            method='setSuspended',
+            email_message_id=self.id
+        )
+
+        return req
+
+    def delete(self):
+        req = self.mms_client.process_request(
+            method='delete',
             email_message_id=self.id
         )
 
