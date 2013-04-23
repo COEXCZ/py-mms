@@ -3,6 +3,7 @@ from datetime import datetime
 
 from dateutil import parser
 from jsonrpc import ServiceProxy, JSONRPCException
+from jsonrpc.json import JSONDecodeException
 
 import choices
 from utils import GroupIterator
@@ -137,23 +138,24 @@ class MMSEmailMessage(object):
         return recipients
 
     def add_recipients(self, recipient_list, chunk_size=None):
-        """
-            email_message_id   - <int>, required
-            recipients -  [{"email", "name", "context"}, ...]
-        """
-        recipients = []
         if chunk_size is None:
             chunk_size = len(recipient_list)
+
+        add_recipient_stats = {
+            "unique_added": 0,
+            "duplicities": 0,
+            "invalid": 0,
+        }
         for chunk in GroupIterator(recipient_list, chunk_size):
             req = self.mms_client.process_request(
                 method='addRecipients',
                 email_message_id=self.id,
                 recipients=chunk
             )
+            for k, v in req.iteritems():
+                add_recipient_stats[k] += v
 
-            recipients += req
-
-        return recipients
+        return add_recipient_stats
     recipients = property(get_recipients, add_recipients)
 
     def get_status(self):
@@ -208,6 +210,12 @@ class MMSClient(object):
                 code=e.error.get('code'),
                 name=e.error.get('name'),
                 message=e.error.get('message'),
+            )
+        except JSONDecodeException:
+            raise MMSClientApiError(
+                code=500,
+                name='Invalid JSON response',
+                message='Server returned non-standard response.',
             )
         else:
             return req
