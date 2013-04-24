@@ -2,6 +2,10 @@
 
 The Python interface to MMS.
 
+## Install
+
+    pip install py-mms
+
 ## Getting Started
 
     import mms
