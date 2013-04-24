@@ -7,7 +7,7 @@ long_description = f.read()
 f.close()
 
 setup(
-    name='MMS',
+    name='py-mms',
     version='0.1',
     author='COEX CZ',
     author_email='support@coex.cz',
